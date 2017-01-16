@@ -9,14 +9,14 @@
     "telegramm"
   ],
   "dependencies": {
-    "restler": "3.4.0",
-    "request": "2.79.0",
-    "path": "^0.12.7",
     "crypto": "0.0.3",
-    "lodash": "4.17.0"
+    "dashbot": "^0.8.2",
+    "lodash": "4.17.0",
+    "path": "^0.12.7",
+    "request": "2.79.0",
+    "restler": "3.4.0"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "engines": {
     "node": "7.1.*",
     "npm": "3.10.*"

@@ -153,6 +153,24 @@ const $this = {
 
         return $this.send(recipient_id, data);
     },
+    sendImage(recipient_id, image_url) {
+      let data = {
+          recipient: {
+              id: recipient_id
+          },
+          message:{
+            attachment: {
+              type: 'image',
+              payload: {
+                url: image_url
+              }
+            }
+          }
+
+      };
+
+      return $this.send(recipient_id, data);
+    },
 
     subscribe() {
         $this.makeRequest("/me/subscribed_apps", {}, "POST")

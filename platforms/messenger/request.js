@@ -132,6 +132,7 @@ module.exports = class Request {
     _(name, params) {
 
         params = params || {first_name : this.sess.user.first_name};
+        params['locale'] = this.sess.user.convo_lang.split('_')[0] || 'en';
 
         return Request.i18n._(name, params);
     }
@@ -146,7 +147,7 @@ module.exports = class Request {
             return onYes(this);
         }
 
-        onNo(this, false);   
+        onNo(this, false);
     }
 
     sendText(text) {
@@ -155,7 +156,7 @@ module.exports = class Request {
 
     sendMenu(text, buttons) {
 
-        return client.sendMenu(this.uid, text, buttons);
+        return client.sendMenu(this.uid, text, this._translateButtons(buttons));
     }
 
     sendList(elements, first = "compact") {
@@ -177,6 +178,10 @@ module.exports = class Request {
         options = this._translateButtons(options);
         return client.sendOptions(this.uid, text, options);
 
+    }
+
+    sendImage(image_url) {
+      return client.sendImage(this.uid, image_url)
     }
 
     _translate(str, opts = {}) {

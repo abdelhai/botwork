@@ -1,18 +1,27 @@
 const
- path = require("path") 
+ path = require("path")
  _ = require("lodash");
 
-module.exports = (config) => {
-
-    let strings = require(path.join( process.cwd(), 'locales', config.locale) );
+module.exports = (config = {}) => {
 
     return {
 
         _(name, params = {}) {
 
-            if (!strings[name]) return name;
+            let strings;
+            let enstrings = require( path.join( process.cwd(), 'locales', 'en') );
 
-            let str = strings[name];
+            try {
+                strings = require( path.join( process.cwd(), 'locales', params.locale) );
+            } catch (e) {
+                strings = enstrings
+            }
+
+            if (!strings[name]) {strings = enstrings};
+
+            let str = strings[name] || enstrings[name];
+
+            if (!str) return name;
 
             if (_.size(params) === 0) {
                 return str;
