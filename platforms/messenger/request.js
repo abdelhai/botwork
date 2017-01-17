@@ -1,21 +1,21 @@
 const
     client = require('./client'),
-    event = require('./../../services').event();
+    event = require('./../../services').event(),
+    config = require('./config'),
+    session = require('./../../services').session(config);
+
 
 module.exports = class Request {
 
     constructor(req) {
 
         this.raw = req;
+        this.session = session.current(req.sender.id)
 
         this.parseRequestMessage(req);
 
         event.emit("messenger_message_in", this);
 
-        this._isYes = this._isYes.bind(this);
-        this._isNo = this._isNo.bind(this);
-        this._isSkip = this._isSkip.bind(this);
-        this._isBack  = this._isBack .bind(this);
         this._translate = this._translate.bind(this);
         this._translateButtons = this._translateButtons.bind(this);
     }
@@ -58,81 +58,39 @@ module.exports = class Request {
 
         let words = this.payload.split(/[ ,]+/);
 
-        this.yes = this._isYes(words);
-        this.no = this._isNo(words);
+        this.yes = this._isAction(words, 'yes');
+        this.no = this._isAction(words, 'no');
+        this.skip = this._isAction(words, 'skip') || this.yes;
+        this.back = this._isAction(words, 'back');
 
-        this.skip = this._isSkip(words) || this.yes;
-
-        this.back = this._isBack(this.payload);
 
     }
 
-    _isBack(input) {
+    _isAction(words, action) {
 
-        let answer = false;
+        let lang, answer;
 
-        if (input.indexOf('$back') != -1 || input.trim().toLowerCase() === 'back') {
-            answer = true;
+        if (this.session.user && this.session.user.convo_lang) {
+            lang = this.session.user.convo_lang.split('_')[0] || 'en';
         }
 
-        return answer;
-    }
+        let params = {locale: lang, arr: true};
 
-    _isSkip(words) {
+        let strings = Request.i18n._(action, params);
 
-        let answer = false;
-        let skip = ["$skip", "skip", "next"];
-
-        skip.forEach((str) => {
+        strings.forEach((str) => {
             words.forEach((word) => {
-                if (word  == str) {
-                    answer = true;
-                }
+                if (word  === str) {answer = true}
             });
-
         });
 
-        return answer;
-    }
-
-    _isYes(words) {
-
-        let answer = false;
-        let yes = ["$yes", "yes", "yep", "right", "ok", "yup", "fine", "sure", "k", "ah", "aha", "ja", "jup", "true", "kk", "agree"];
-
-        yes.forEach((str) => {
-            words.forEach((word) => {
-                if (word  == str) {
-                    answer = true;
-                }
-            });
-
-        });
-
-        return answer;
-    }
-
-    _isNo(words) {
-
-        let answer = false;
-        let no = ["$no", "no", "nope", "noo", "nah", "false", "wrong", "ne", "nein", "not", "uh-uh"];
-
-        no.forEach((str) => {
-            words.forEach((word) => {
-                if (word  == str) {
-                    answer = true;
-                }
-            });
-
-        });
-
-        return answer;
+        return answer; 
     }
 
     _(name, params) {
-
-        params = params || {first_name : this.sess.user.first_name};
-        params['locale'] = this.sess.user.convo_lang.split('_')[0] || 'en';
+        let usr = this.sess.user;
+        params = params || {first_name : usr.first_name};
+        params['locale'] = usr.convo_lang ? usr.convo_lang.split('_')[0] : 'en';
 
         return Request.i18n._(name, params);
     }
@@ -181,7 +139,7 @@ module.exports = class Request {
     }
 
     sendImage(image_url) {
-      return client.sendImage(this.uid, image_url)
+      return client.sendImage(this.uid, image_url);
     }
 
     _translate(str, opts = {}) {

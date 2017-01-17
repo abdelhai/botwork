@@ -23,7 +23,7 @@ module.exports = (config = {}) => {
 
             if (!str) return name;
 
-            if (_.size(params) === 0) {
+            if (_.size(params) === 0 || params.arr) {
                 return str;
             }
 
