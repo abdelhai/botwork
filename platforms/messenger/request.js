@@ -74,7 +74,7 @@ module.exports = class Request {
             lang = this.session.user.convo_lang.split('_')[0] || 'en';
         }
 
-        let params = {locale: lang, arr: true};
+        let params = {locale: lang};
 
         let strings = Request.i18n._(action, params);
 
